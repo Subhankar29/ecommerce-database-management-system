@@ -14,6 +14,6 @@ public class EcommerceAppServiceImpl implements EcommerceAppService {
 
   @Override
   public String getAllProducts(String user_name, String pass_word) {
-    return ecommerceAppDao.getAllProducts( user_name,  pass_word);
+    return "";// ecommerceAppDao.getAllProducts( user_name, pass_word);
   }
 }

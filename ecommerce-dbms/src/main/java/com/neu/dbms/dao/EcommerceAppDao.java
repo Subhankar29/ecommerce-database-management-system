@@ -1,11 +1,19 @@
 package com.neu.dbms.dao;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+
+import com.neu.dbms.model.Category;
+import com.neu.dbms.model.Product;
 
 @Component
 public interface EcommerceAppDao {
 
-  public String getAllProducts(String user_Name, String pass_word);
+  public String getUser(String user_Name, String pass_word);
 
+  public List<Category> getCategories();
+
+  public List<Product> getProductsByCatgory(int categoryId);
 }

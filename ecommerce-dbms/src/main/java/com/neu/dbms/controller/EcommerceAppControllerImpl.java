@@ -1,5 +1,7 @@
 package com.neu.dbms.controller;
 
+import java.util.List;
+
 import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.neu.dbms.dao.EcommerceAppDaoImpl;
+import com.neu.dbms.model.Category;
 import com.neu.dbms.service.EcommerceAppServiceImpl;
 
 @RestController
@@ -17,13 +22,13 @@ import com.neu.dbms.service.EcommerceAppServiceImpl;
 public class EcommerceAppControllerImpl implements EcommerceAppController {
 
   @Autowired
-  private EcommerceAppServiceImpl ecommerceAppService;
+  private EcommerceAppDaoImpl ecommerceAppDao;
 
   @GetMapping("getUsers")
   public String getAllUsers(@RequestParam("username") String username,
       @RequestParam("password") String password) {
     System.out.println("Executed Get user");
-    return ecommerceAppService.getAllProducts(username, password);
+    return ecommerceAppDao.getUser(username, password);
   }
 
   @PostMapping("addUser/{name}")
@@ -33,15 +38,15 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
   }
 
   @GetMapping("getCategories")
-  public void getCategories() {
+  public List<Category> getCategories() {
     System.out.println("Executed get categories");
-    // ecommerceAppService.getAllProducts();
+    return ecommerceAppDao.getCategories();
   }
 
-  @PostMapping("test")
-  public void getProductsByCategoryId() {
+  @PostMapping("getProductsByCategory")
+  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
     System.out.println("Executed get prodcts by category Id");
-    // ecommerceAppService.getAllProducts();
+    ecommerceAppDao.getProductsByCatgory(categoryId);
   }
 
   @GetMapping("test")
