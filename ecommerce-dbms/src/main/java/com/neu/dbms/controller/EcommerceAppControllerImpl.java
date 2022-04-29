@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.neu.dbms.dao.EcommerceAppDaoImpl;
 import com.neu.dbms.model.Category;
+import com.neu.dbms.model.Product;
 import com.neu.dbms.service.EcommerceAppServiceImpl;
 
 @RestController
@@ -50,15 +51,29 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     return ecommerceAppDao.getCategories();
   }
 
-  @PostMapping("getProductsByCategory")
-  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
+  @GetMapping("getProductsByCategory")
+  public List<Product> getProductsByCatgory(@RequestParam("catId") int categoryId) {
     System.out.println("Executed get prodcts by category Id");
-    ecommerceAppDao.getProductsByCatgory(categoryId);
+    return ecommerceAppDao.getProductsByCategory(categoryId);
   }
 
-  @GetMapping("test")
-  public void getAddToCart() {
-    System.out.println("Executed Add to cart");
-    // ecommerceAppService.getAllProducts();
+  @PostMapping("insertOrderDetails")
+  public void insertOrderDetails(@RequestParam("orderid") int orderid) {
+    System.out.println("Executed insert order details");
+    ecommerceAppDao.insertOrderDetails(orderid);
+  }
+
+  @PostMapping("insertOrders")
+  public void insertOrders(@RequestParam("shipAdd") String shippingAddress,
+      @RequestParam("userid") int userid, @RequestParam("status") String status) {
+    System.out.println("Executed insert orders");
+    ecommerceAppDao.insertOrders(shippingAddress, userid, status);
+  }
+
+  @PostMapping("insertPaymentInfo")
+  public void insertPaymentInfo(@RequestParam("orderid") int orderid,
+      @RequestParam("paymentInfo") String paymentInfo) {
+    System.out.println("Executed insert payment info");
+    ecommerceAppDao.insertPaymentInfo(orderid, paymentInfo);
   }
 }
