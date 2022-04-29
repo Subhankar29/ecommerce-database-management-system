@@ -49,17 +49,21 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         System.out.print("Operation stopped");
         in.close();
       }
-    }else {
-      List<Category> categoryList = this.getCategories();
-      System.out.println("\n");
-      categoryList.forEach(s->{
-        System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
-      });
-      System.out.println("\nChoose a category (Enter the id)");
-      int selectedCategory = Integer.parseInt(in.nextLine());
-      List<Product> productList = this.getProductsByCatgory(selectedCategory);
-      
-    }
+    } 
+    
+    List<Category> categoryList = this.getCategories();
+    System.out.println("\n");
+    categoryList.forEach(s->{
+      System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
+    });
+    System.out.println("\nChoose a category (Enter the id)");
+    int selectedCategory = Integer.parseInt(in.nextLine());
+    List<Product> productList = this.getProductsByCatgory(selectedCategory);
+    
+    productList.forEach(product->{
+      System.out.println(product.getProductId() + "--->" + product.getName() + " Description --->" + product.getDescription() + " Price --->" + product.getPrice() + " ");
+    });
+    
     //return ecommerceAppDao.getUser(username, password);
   }
   
@@ -87,27 +91,55 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     ecommerceAppDao.addCart(cartId, productId, quantity, accountId);
   }
 
-  @GetMapping("getCategories")
-  public List<Category> getCategories() {
-    System.out.println("Executed get categories");
-    return ecommerceAppDao.getCategories();
-  }
-
 //  @PostMapping("getProductsByCategory")
 //  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
 //    System.out.println("Executed get prodcts by category Id");
 //    ecommerceAppDao.getProductsByCategory(categoryId);
 //  }
-  
-  @GetMapping("getProductsByCategory")
-  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
-    System.out.println("Executed get prodcts by category Id");
-    ecommerceAppDao.getProductsByCategory(categoryId);
-  }
 
   @GetMapping("test")
   public void getAddToCart() {
     System.out.println("Executed Add to cart");
     // ecommerceAppService.getAllProducts();
+  }
+  
+  @GetMapping("getCategories")
+  public List<Category> getCategories() {
+  System.out.println("Executed get categories");
+  return ecommerceAppDao.getCategories();
+  }
+
+
+
+  @GetMapping("getProductsByCategory")
+  public List<Product> getProductsByCatgory(@RequestParam("catId") int categoryId) {
+  System.out.println("Executed get prodcts by category Id");
+  return ecommerceAppDao.getProductsByCategory(categoryId);
+  }
+
+
+
+  @PostMapping("insertOrderDetails")
+  public void insertOrderDetails(@RequestParam("orderid") int orderid) {
+  System.out.println("Executed insert order details");
+  ecommerceAppDao.insertOrderDetails(orderid);
+  }
+
+
+
+  @PostMapping("insertOrders")
+  public void insertOrders(@RequestParam("shipAdd") String shippingAddress,
+  @RequestParam("userid") int userid, @RequestParam("status") String status) {
+  System.out.println("Executed insert orders");
+  ecommerceAppDao.insertOrders(shippingAddress, userid, status);
+  }
+
+
+
+  @PostMapping("insertPaymentInfo")
+  public void insertPaymentInfo(@RequestParam("orderid") int orderid,
+  @RequestParam("paymentInfo") String paymentInfo) {
+  System.out.println("Executed insert payment info");
+  ecommerceAppDao.insertPaymentInfo(orderid, paymentInfo);
   }
 }
