@@ -14,7 +14,9 @@ public interface EcommerceAppDao {
   public String getUser(String user_Name, String pass_word);
 
   public List<Category> getCategories();
-
+  
+  public void addCart(int cartId, int productId, int quantity, int accountId);
+  
   public List<Product> getProductsByCategory(int categoryId);
   
   public void insertOrders(String shippingAddress, int userid, String status);
