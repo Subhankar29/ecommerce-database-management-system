@@ -90,14 +90,15 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<Category> getCategories() {
     List<Category> categoryList = new ArrayList<>();
     try {
+      Connection conn = this.getConnection();
       Statement catstmt = conn.createStatement();
       ResultSet catrs = catstmt.executeQuery("Select * from Category");
-      if (catrs.next()) {
+      while (catrs.next()) {
         Category cat = new Category();
-        cat.setCategoryId(catrs.getInt(0));
-        cat.setCategoryName(catrs.getString(1));
-        cat.setDepartmentName(catrs.getString(2));
-        cat.setDescription(catrs.getString(3));
+        cat.setCategoryId(catrs.getInt(1));
+        cat.setCategoryName(catrs.getString(2));
+        cat.setDepartmentName(catrs.getString(3));
+        cat.setDescription(catrs.getString(4));
         categoryList.add(cat);
       }
     } catch (SQLException e) {
@@ -112,7 +113,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     try {
       Connection conn = this.getConnection();
       PreparedStatement prodpstmt = conn
-          .prepareStatement("SELECT * from Products where CategoryId = ?");
+          .prepareStatement("SELECT * from Product where CategoryId = ?");
       List<String> characternames = new ArrayList<>();
       prodpstmt.setInt(1, categoryId);
       ResultSet rs = prodpstmt.executeQuery();
@@ -224,6 +225,25 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
       CallableStatement cancelorder = conn.prepareCall("call cancel_Order(?)");
       cancelorder.setInt(1, orderid);
       ResultSet rs = cancelorder.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void registerUser(String emailAddress, String password, String address, int contact,
+      String state) {
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement registerUser = conn.prepareCall("call create_user(?, ?, ?, ?, ?)");
+      registerUser.setString(1, emailAddress);
+      registerUser.setString(2, password);
+      registerUser.setString(3, address);
+      registerUser.setInt(4, contact);
+      registerUser.setString(5, state);
+      
+      ResultSet rs = registerUser.executeQuery();
+      System.out.print("Successfully registered the users");
     } catch (SQLException e) {
       e.printStackTrace();
     }
