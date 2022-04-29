@@ -11,7 +11,9 @@ import com.neu.dbms.model.Product;
 @Component
 public interface EcommerceAppDao {
 
-  public String getUser(String user_Name, String pass_word);
+  public String getUser(String emailAddress, String password);
+  
+  public void registerUser(String emailAddress, String password, String address, int contact, String state);
 
   public List<Category> getCategories();
   

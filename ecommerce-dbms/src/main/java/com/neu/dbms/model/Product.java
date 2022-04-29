@@ -11,6 +11,7 @@ public class Product {
  private String supplier; 
  private int categoryId; 
  private int productId; 
+ 
   public int getProductId() {
     return productId;
   }

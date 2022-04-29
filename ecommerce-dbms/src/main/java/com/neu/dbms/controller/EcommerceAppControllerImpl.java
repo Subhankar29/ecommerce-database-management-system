@@ -1,6 +1,7 @@
 package com.neu.dbms.controller;
 
 import java.util.List;
+import java.util.Scanner;
 
 import javax.websocket.server.PathParam;
 
@@ -25,6 +26,43 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
   @Autowired
   private EcommerceAppDaoImpl ecommerceAppDao;
 
+  @GetMapping("/")
+  public void getConnection() {
+    System.out.println("Executed Get connection");
+    System.out.println("Enter username");
+    Scanner in = new Scanner(System.in);
+    String username = in.nextLine();
+    String password = in.nextLine();
+    String response = this.getAllUsers(username, password);
+    System.out.println(response);
+    if(response.contains("Invalid")) {
+      System.out.println("Do you want to register user ? (y/n)");
+      String ifregister = in.nextLine();
+      if("y".contentEquals(ifregister)) {
+        String emailAddress = in.nextLine();
+        String password1 = in.nextLine();
+        String billingaddress = in.nextLine();
+        int contact = Integer.parseInt(in.nextLine());
+        String state = in.nextLine();
+        this.registerUser(emailAddress, password1, billingaddress, contact, state);
+      }else {
+        System.out.print("Operation stopped");
+        in.close();
+      }
+    }else {
+      List<Category> categoryList = this.getCategories();
+      System.out.println("\n");
+      categoryList.forEach(s->{
+        System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
+      });
+      System.out.println("\nChoose a category (Enter the id)");
+      int selectedCategory = Integer.parseInt(in.nextLine());
+      List<Product> productList = this.getProductsByCatgory(selectedCategory);
+      
+    }
+    //return ecommerceAppDao.getUser(username, password);
+  }
+  
   @GetMapping("getUsers")
   public String getAllUsers(@RequestParam("username") String username,
       @RequestParam("password") String password) {
@@ -32,9 +70,15 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     return ecommerceAppDao.getUser(username, password);
   }
 
-  @PostMapping("addUser/{name}")
-  public void addUser(@PathParam("name") String name) {
+  @PostMapping("registerUser")
+  public void registerUser(
+      @RequestParam("emailAddress") String emailAddress, 
+      @RequestParam("password") String password, 
+      @RequestParam("address") String address,
+      @RequestParam("contact") int contact,
+      @RequestParam("state") String state) {
     System.out.println("Executed Add user");
+    ecommerceAppDao.registerUser(emailAddress, password, address, contact, state);
   }
   
   @PostMapping("addCart")
@@ -42,8 +86,6 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     System.out.println("Executed Add cart");
     ecommerceAppDao.addCart(cartId, productId, quantity, accountId);
   }
-  
-  
 
   @GetMapping("getCategories")
   public List<Category> getCategories() {
@@ -51,29 +93,21 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     return ecommerceAppDao.getCategories();
   }
 
+//  @PostMapping("getProductsByCategory")
+//  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
+//    System.out.println("Executed get prodcts by category Id");
+//    ecommerceAppDao.getProductsByCategory(categoryId);
+//  }
+  
   @GetMapping("getProductsByCategory")
-  public List<Product> getProductsByCatgory(@RequestParam("catId") int categoryId) {
+  public void getProductsByCatgory(@RequestParam("catId") int categoryId) {
     System.out.println("Executed get prodcts by category Id");
-    return ecommerceAppDao.getProductsByCategory(categoryId);
+    ecommerceAppDao.getProductsByCategory(categoryId);
   }
 
-  @PostMapping("insertOrderDetails")
-  public void insertOrderDetails(@RequestParam("orderid") int orderid) {
-    System.out.println("Executed insert order details");
-    ecommerceAppDao.insertOrderDetails(orderid);
-  }
-
-  @PostMapping("insertOrders")
-  public void insertOrders(@RequestParam("shipAdd") String shippingAddress,
-      @RequestParam("userid") int userid, @RequestParam("status") String status) {
-    System.out.println("Executed insert orders");
-    ecommerceAppDao.insertOrders(shippingAddress, userid, status);
-  }
-
-  @PostMapping("insertPaymentInfo")
-  public void insertPaymentInfo(@RequestParam("orderid") int orderid,
-      @RequestParam("paymentInfo") String paymentInfo) {
-    System.out.println("Executed insert payment info");
-    ecommerceAppDao.insertPaymentInfo(orderid, paymentInfo);
+  @GetMapping("test")
+  public void getAddToCart() {
+    System.out.println("Executed Add to cart");
+    // ecommerceAppService.getAllProducts();
   }
 }
