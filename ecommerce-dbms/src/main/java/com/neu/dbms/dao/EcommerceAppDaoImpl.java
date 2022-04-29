@@ -107,7 +107,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   }
 
   @Override
-  public List<Product> getProductsByCatgory(int categoryId) {
+  public List<Product> getProductsByCategory(int categoryId) {
     List<Product> productList = new ArrayList<>();
     try {
       Connection conn = this.getConnection();
@@ -131,6 +131,80 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
       e.printStackTrace();
     }
     return productList;
+  }
+  
+  @Override
+  public int insertOrderDetails(int orderid) {
+    int row = 0;
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement callstmt = conn.prepareCall("call insert_Orders_Details(?)");
+      callstmt.setInt(1, orderid);
+      ResultSet rs = callstmt.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return row;
+  }
+
+  public void insertOrders(String shippingAddress, int userid, String status) {
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement callstmt = conn.prepareCall("call insert_Orders(?,?,?)");
+      callstmt.setString(1, shippingAddress);
+      callstmt.setInt(2, userid);
+      callstmt.setString(3, status);
+      ResultSet rs = callstmt.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void insertPaymentInfo(int orderId, String paymentInfo) {
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement callstmt = conn.prepareCall("call insert_Payment_Info(?,?)");
+      callstmt.setInt(1, orderId);
+      callstmt.setString(2, paymentInfo);
+      ResultSet rs = callstmt.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void getOrdersByUser(int userId) {
+    try {
+      Connection conn = this.getConnection();
+      PreparedStatement ordersstmt = conn
+          .prepareStatement("select * from Orders where customerId = ?");
+      ordersstmt.setInt(1, userId);
+      ResultSet rs = ordersstmt.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void getOrderDetails(int orderid) {
+    try {
+      Connection conn = this.getConnection();
+      PreparedStatement ordersstmt = conn
+          .prepareStatement("select * from OrderDetails where orderId = ?");
+      ordersstmt.setInt(1, orderid);
+      ResultSet rs = ordersstmt.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void cancelOrder(int orderid) {
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement cancelorder = conn.prepareCall("call cancel_Order(?)");
+      cancelorder.setInt(1, orderid);
+      ResultSet rs = cancelorder.executeQuery();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 
 //  // on click add to cart
