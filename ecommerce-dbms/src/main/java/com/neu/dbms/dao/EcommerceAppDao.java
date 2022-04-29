@@ -16,4 +16,6 @@ public interface EcommerceAppDao {
   public List<Category> getCategories();
 
   public List<Product> getProductsByCatgory(int categoryId);
+  
+  public void addCart(int cartId, int productId, int quantity, int accountId);
 }

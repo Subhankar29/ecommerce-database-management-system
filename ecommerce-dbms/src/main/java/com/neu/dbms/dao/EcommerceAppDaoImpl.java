@@ -132,6 +132,35 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     }
     return productList;
   }
+  
+  // 1.  
+  // 2. 
+  // 3. 
+  // 4. 
+  
+  @Override
+  public void addCart(int cartId, int productId,int quantity, int accountId) {
+    
+    try {
+    this.conn = this.getConnection();
+    
+    String callQuery = "{CALL add_cart(?, ?, ?, ?)}";
+    CallableStatement stmt = conn.prepareCall(callQuery);
+    
+    stmt.setInt(1, cartId);
+    stmt.setInt(2, productId);
+    stmt.setInt(3, quantity);
+    stmt.setInt(4, accountId);
+    
+    ResultSet resultSet = stmt.executeQuery();
+       
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    
+  }
+  
+
 
 //  // on click add to cart
 //  @Override

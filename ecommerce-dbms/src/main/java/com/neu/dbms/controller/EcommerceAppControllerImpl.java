@@ -34,8 +34,15 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
   @PostMapping("addUser/{name}")
   public void addUser(@PathParam("name") String name) {
     System.out.println("Executed Add user");
-    // ecommerceAppService.addUser();
   }
+  
+  @PostMapping("addCart")
+  public void addCart(@RequestParam("cartId") int cartId, @RequestParam("productId") int productId, @RequestParam("quantity") int quantity, @RequestParam("accountId") int accountId) {
+    System.out.println("Executed Add cart");
+    ecommerceAppDao.addCart(cartId, productId, quantity, accountId);
+  }
+  
+  
 
   @GetMapping("getCategories")
   public List<Category> getCategories() {
