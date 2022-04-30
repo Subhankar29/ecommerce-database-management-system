@@ -15,6 +15,8 @@ import org.springframework.stereotype.Repository;
 
 import com.neu.dbms.model.CartProduct;
 import com.neu.dbms.model.Category;
+import com.neu.dbms.model.OrderDetail;
+import com.neu.dbms.model.Orders;
 import com.neu.dbms.model.Product;
 
 @Repository
@@ -37,10 +39,6 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
    */
   private final String dbName = "ecommerce";
 
-  /** The name of the table we are testing with */
-  private final String tableName = "lotr_character";
-  private final boolean useSSL = false;
-  private String inputcharname;
   private Connection conn;
 
   /**
@@ -49,7 +47,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
    * @return
    * @throws SQLException
    */
-  private Connection getConnection() throws SQLException {
+  public void getConnection() throws SQLException {
     Connection conn = null;
     Properties connectionProps = new Properties();
     try {
@@ -63,35 +61,33 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
-    return conn;
+    this.conn = conn;
   }
 
   @Override
-  public String getUser(String user_Name, String pass_word) {
+  public int getUser(String user_Name, String pass_word) {
+    int res = 0;
     try {
-      conn = this.getConnection();
-      PreparedStatement pstmt = conn
-          .prepareStatement("SELECT Email from user where Email = ? AND password = ?");
-      List<String> characternames = new ArrayList<>();
+      PreparedStatement pstmt = this.conn
+          .prepareStatement("SELECT loginId from user where Email = ? AND password = ?");
       pstmt.setString(1, user_Name);
       pstmt.setString(2, pass_word);
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
-        return "User Exists";
+        res = rs.getInt(1);
       }
-      return "Invalid username";
     } catch (SQLException e) {
       e.printStackTrace();
-      return "Invalid username";
     }
+
+    return res;
   }
 
   @Override
   public int getAccountId(String emailAddress) {
     try {
-      conn = this.getConnection();
-      PreparedStatement pstmt = conn.prepareStatement(
+      PreparedStatement pstmt = this.conn.prepareStatement(
           "SELECT AccountId from Account a inner join User u on u.loginId=a.userId  where u.Email = ?");
 
       pstmt.setString(1, emailAddress);
@@ -111,8 +107,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<Category> getCategories() {
     List<Category> categoryList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      Statement catstmt = conn.createStatement();
+      Statement catstmt = this.conn.createStatement();
       ResultSet catrs = catstmt.executeQuery("Select * from Category");
       while (catrs.next()) {
         Category cat = new Category();
@@ -132,10 +127,8 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public void addCart(int cartId, int productId, int quantity, int accountId) {
 
     try {
-      this.conn = this.getConnection();
-
       String callQuery = "{CALL add_cart(?, ?, ?)}";
-      CallableStatement stmt = conn.prepareCall(callQuery);
+      CallableStatement stmt = this.conn.prepareCall(callQuery);
 
       stmt.setInt(1, productId);
       stmt.setInt(2, quantity);
@@ -153,8 +146,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public int insertOrderDetails(int orderid) {
     int row = 0;
     try {
-      Connection conn = this.getConnection();
-      CallableStatement callstmt = conn.prepareCall("call insert_Orders_Details(?)");
+      CallableStatement callstmt = this.conn.prepareCall("call insert_Orders_Details(?)");
       callstmt.setInt(1, orderid);
       ResultSet rs = callstmt.executeQuery();
     } catch (SQLException e) {
@@ -166,8 +158,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   @Override
   public void updateCart(int accountId, int productId, int quantity) {
     try {
-      Connection conn = this.getConnection();
-      CallableStatement updateCart = conn.prepareCall("call update_cart(?, ?, ?)");
+      CallableStatement updateCart = this.conn.prepareCall("call update_cart(?, ?, ?)");
       updateCart.setInt(1, productId);
       updateCart.setInt(2, quantity);
       updateCart.setInt(3, accountId);
@@ -182,8 +173,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<CartProduct> getProductsFromCart(int accountId) {
     List<CartProduct> productList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      PreparedStatement prodpstmt = conn.prepareStatement(
+      PreparedStatement prodpstmt = this.conn.prepareStatement(
           "select p.productid, p.name, c.quantity, (p.price * c.quantity) as subtotal from product as p inner join cart as c on c.productId = p.productId where accountId = ?");
 
       prodpstmt.setInt(1, accountId);
@@ -203,11 +193,11 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   }
 
   @Override
-  public void registerUser(String emailAddress, String password, String address, int contact,
+  public int registerUser(String emailAddress, String password, String address, int contact,
       String state) {
+    int res = 0;
     try {
-      Connection conn = this.getConnection();
-      CallableStatement registerUser = conn.prepareCall("call create_user(?, ?, ?, ?, ?)");
+      CallableStatement registerUser = this.conn.prepareCall("SELECT create_user(?, ?, ?, ?, ?)");
       registerUser.setString(1, password);
       registerUser.setString(2, emailAddress);
       registerUser.setString(3, address);
@@ -216,19 +206,23 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
 
       ResultSet rs = registerUser.executeQuery();
       System.out.print("Successfully registered the users");
+
+      if (rs.next()) {
+        res = rs.getInt(1);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
+
+    return res;
   }
 
   @Override
   public List<Product> getProductsByCategory(int categoryId) {
     List<Product> productList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      PreparedStatement prodpstmt = conn
+      PreparedStatement prodpstmt = this.conn
           .prepareStatement("SELECT * from Product where CategoryId = ?");
-      List<String> characternames = new ArrayList<>();
       prodpstmt.setInt(1, categoryId);
       ResultSet rs = prodpstmt.executeQuery();
       while (rs.next()) {
@@ -251,8 +245,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public int insertOrders(String shippingAddress, int userid, String status) {
     int res = 0;
     try {
-      Connection conn = this.getConnection();
-      CallableStatement callstmt = conn.prepareCall("select insert_Orders(?,?,?)");
+      CallableStatement callstmt = this.conn.prepareCall("select insert_Orders(?,?,?)");
       callstmt.setString(1, shippingAddress);
       callstmt.setInt(2, userid);
       callstmt.setString(3, status);
@@ -270,10 +263,10 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   @Override
   public void insertPaymentInfo(int orderId, int paymentInfo, int accountId) {
     try {
-      Connection conn = this.getConnection();
-      CallableStatement callstmt = conn.prepareCall("call insert_Payment_Info(?,?)");
+      CallableStatement callstmt = this.conn.prepareCall("call insert_Payment_Info(?,?,?)");
       callstmt.setInt(1, orderId);
       callstmt.setInt(2, paymentInfo);
+      callstmt.setInt(3, accountId);
       ResultSet rs = callstmt.executeQuery();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -283,8 +276,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<String> getPaymentModes() {
     List<String> payModeList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      Statement paymode = conn.createStatement();
+      Statement paymode = this.conn.createStatement();
       ResultSet catrs = paymode.executeQuery("Select * from PaymentMode");
       while (catrs.next()) {
         payModeList.add(catrs.getString(2));
@@ -295,34 +287,53 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     return payModeList;
   }
 
-  public void getOrdersByUser(int userId) {
+  public List<Orders> getOrdersByUser(int userId) {
+    List<Orders> ordersList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      PreparedStatement ordersstmt = conn
-          .prepareStatement("select * from Orders where customerId = ?");
+      PreparedStatement ordersstmt = this.conn.prepareStatement(
+          "select orderId, dateCreated, total, status from orders where customerId = ?");
       ordersstmt.setInt(1, userId);
       ResultSet rs = ordersstmt.executeQuery();
+      while(rs.next()) {
+        Orders od = new Orders();
+        od.setOrderId(rs.getInt(1));
+        od.setDateCreated(rs.getString(2));
+        od.setTotal(rs.getInt(3));
+        od.setStatus(rs.getString(4));
+        ordersList.add(od);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    return ordersList;
   }
 
-  public void getOrderDetails(int orderid) {
+  public List<OrderDetail> getOrderDetails(int orderid) {
+    List<OrderDetail> orderDetailList = new ArrayList<>();
     try {
-      Connection conn = this.getConnection();
-      PreparedStatement ordersstmt = conn
-          .prepareStatement("select * from OrderDetails where orderId = ?");
+      PreparedStatement ordersstmt = this.conn.prepareStatement("call get_Order_Details(?)");
       ordersstmt.setInt(1, orderid);
       ResultSet rs = ordersstmt.executeQuery();
+      while (rs.next()) {
+        OrderDetail od = new OrderDetail();
+        od.setProductName(rs.getString(1));
+        od.setQuantity(rs.getInt(2));
+        od.setUnitCost(rs.getInt(3));
+        od.setSubTotal(rs.getInt(4));
+        od.setShippingAddress(rs.getString(5));
+        od.setStatus(rs.getString(6));
+        od.setPaymentMode(rs.getString(7));
+        orderDetailList.add(od);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    return orderDetailList;
   }
 
   public void cancelOrder(int orderid) {
     try {
-      Connection conn = this.getConnection();
-      CallableStatement cancelorder = conn.prepareCall("call cancel_Order(?)");
+      CallableStatement cancelorder = this.conn.prepareCall("call cancel_Order(?)");
       cancelorder.setInt(1, orderid);
       ResultSet rs = cancelorder.executeQuery();
     } catch (SQLException e) {

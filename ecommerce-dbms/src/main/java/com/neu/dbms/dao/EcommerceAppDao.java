@@ -14,13 +14,13 @@ public interface EcommerceAppDao {
 
   public void updateCart(int accountId, int productId, int quantity);
   
-  public String getUser(String emailAddress, String password);
+  public int getUser(String emailAddress, String password);
   
   public List<CartProduct> getProductsFromCart(int accountid);
   
   public int getAccountId(String emailAddress);
   
-  public void registerUser(String emailAddress, String password, String address, int contact, String state);
+  public int registerUser(String emailAddress, String password, String address, int contact, String state);
 
   public List<Category> getCategories();
   
