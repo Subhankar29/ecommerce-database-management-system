@@ -9,7 +9,7 @@ import com.neu.dbms.model.Category;
 @Component
 public interface EcommerceAppController {
 
-  public String getAllUsers(String user_name, String pass_word);
+  public String getUser(String user_name, String pass_word);
 
   public List<Category> getCategories();
 

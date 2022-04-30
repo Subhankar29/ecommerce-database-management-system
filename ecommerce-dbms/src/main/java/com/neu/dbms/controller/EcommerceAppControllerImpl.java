@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.neu.dbms.dao.EcommerceAppDaoImpl;
+import com.neu.dbms.model.CartProduct;
 import com.neu.dbms.model.Category;
 import com.neu.dbms.model.Product;
 import com.neu.dbms.service.EcommerceAppServiceImpl;
@@ -25,6 +26,7 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
 
   @Autowired
   private EcommerceAppDaoImpl ecommerceAppDao;
+  double totalVal = 0;
 
   @GetMapping("/")
   public void getConnection() {
@@ -32,43 +34,102 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     System.out.println("Enter username");
     Scanner in = new Scanner(System.in);
     String username = in.nextLine();
+    System.out.println("Enter Password");
     String password = in.nextLine();
-    String response = this.getAllUsers(username, password);
+    String response = this.getUser(username, password);
+   
+   
     System.out.println(response);
-    if(response.contains("Invalid")) {
+    if (response.contains("Invalid")) {
       System.out.println("Do you want to register user ? (y/n)");
       String ifregister = in.nextLine();
-      if("y".contentEquals(ifregister)) {
+      if ("y".contentEquals(ifregister)) {
+        System.out.println("Enter username:");
         String emailAddress = in.nextLine();
+        System.out.println("Enter password:");
         String password1 = in.nextLine();
+        System.out.println("Enter billing address:");
         String billingaddress = in.nextLine();
+        System.out.println("Enter billing contact number:");
         int contact = Integer.parseInt(in.nextLine());
+        System.out.println("Enter STATE:");
         String state = in.nextLine();
         this.registerUser(emailAddress, password1, billingaddress, contact, state);
-      }else {
+      } else {
         System.out.print("Operation stopped");
         in.close();
       }
     } 
     
-    List<Category> categoryList = this.getCategories();
-    System.out.println("\n");
-    categoryList.forEach(s->{
-      System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
-    });
-    System.out.println("\nChoose a category (Enter the id)");
-    int selectedCategory = Integer.parseInt(in.nextLine());
-    List<Product> productList = this.getProductsByCatgory(selectedCategory);
+    int accountId = ecommerceAppDao.getAccountId(username);
+    System.out.println("User Id --->" + accountId);
     
-    productList.forEach(product->{
-      System.out.println(product.getProductId() + "--->" + product.getName() + " Description --->" + product.getDescription() + " Price --->" + product.getPrice() + " ");
-    });
+    boolean isContinueToAddProduct = true;
     
+    while (isContinueToAddProduct) {
+      List<Category> categoryList = this.getCategories();
+      System.out.println("\n");
+      categoryList.forEach(s->{
+        System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
+      });
+      System.out.println("\nChoose a category (Enter the id)");
+      int selectedCategory = Integer.parseInt(in.nextLine());
+      List<Product> productList = this.getProductsByCatgory(selectedCategory);
+      
+      productList.forEach(product->{
+        System.out.println(product.getProductId() + "--->" + product.getName() + " Description --->" + product.getDescription() + " Price --->" + product.getPrice() + " ");
+      });
+      
+      System.out.println("Select a product (product Id) to add to cart");
+      int productId =  Integer.parseInt(in.nextLine());
+      this.addCart(1, productId, 1, accountId);
+      
+      System.out.println("Do you want to add more product y/n");
+      String isAddProduct = in.nextLine();
+      if ("n".contentEquals(isAddProduct)) {
+        System.out.println("Moving to Cart");
+        isContinueToAddProduct = false;
+        break;
+      }
+    }
+    
+    boolean isAddToCart = true;
+    
+    while (isAddToCart) {
+      System.out.println("Products in cart:");
+      List<CartProduct> productList = ecommerceAppDao.getProductsFromCart(accountId);
+     
+      totalVal = 0;
+      productList.forEach(product->{
+        System.out.println(product.getProductId() + "--->" + product.getName() + " quantity --->" + product.getQuantity() + " sub-total --->" + product.getSubtotal() + " ");
+        totalVal = totalVal + product.getSubtotal();
+      });
+      
+     System.out.print("Total cart amount: " + totalVal);
+     
+     System.out.println("Do you want to update cart or go to checkout? Press Y to update cart or N to checkout");
+     
+     String isUpdateCart = in.nextLine();
+     if ("y".contentEquals(isUpdateCart)) {
+       System.out.println("Select product id to update the quantity");
+       int productId = in.nextInt();
+       System.out.println("Please sepcify the product quantity");
+       int quantity = in.nextInt();
+       ecommerceAppDao.updateCart(accountId, productId, quantity);
+     } else {
+       isAddToCart = false; 
+       break;
+     } 
+    }
+    
+    System.out.println("SELECT THE PAYMENT METHOD");
     //return ecommerceAppDao.getUser(username, password);
   }
   
+  
+  
   @GetMapping("getUsers")
-  public String getAllUsers(@RequestParam("username") String username,
+  public String getUser(@RequestParam("username") String username,
       @RequestParam("password") String password) {
     System.out.println("Executed Get user");
     return ecommerceAppDao.getUser(username, password);
