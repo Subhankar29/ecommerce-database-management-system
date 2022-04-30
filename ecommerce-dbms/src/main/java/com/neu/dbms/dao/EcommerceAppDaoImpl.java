@@ -140,12 +140,12 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
 
   }
 
-  @Override
-  public int insertOrderDetails(int orderid) {
+  public int insertOrderDetails(int orderid, int userid) {
     int row = 0;
     try {
-      CallableStatement callstmt = this.conn.prepareCall("call insert_Orders_Details(?)");
+      CallableStatement callstmt = this.conn.prepareCall("call insert_Orders_Details(?, ?)");
       callstmt.setInt(1, orderid);
+      callstmt.setInt(2, userid);
       ResultSet rs = callstmt.executeQuery();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -333,5 +333,20 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+  
+  public boolean ifUserExists(String email) {
+    boolean ifUserExist = false;
+    try {
+      PreparedStatement ordersstmt = this.conn.prepareStatement("call if_User_Exists(?)");
+      ordersstmt.setString(1, email);
+      ResultSet rs = ordersstmt.executeQuery();
+      if (rs.next()) {
+        ifUserExist = true;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return ifUserExist;
   }
 }

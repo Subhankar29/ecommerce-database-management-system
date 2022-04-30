@@ -32,5 +32,5 @@ public interface EcommerceAppDao {
 
   public void insertPaymentInfo(int orderId, int paymentInfo, int accountId);
 
-  public int insertOrderDetails(int orderid);
+  public int insertOrderDetails(int orderid, int userid);
 }

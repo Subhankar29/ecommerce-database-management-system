@@ -25,6 +25,7 @@ public class EcommerceAppController {
     Scanner in = new Scanner(System.in);
 
     String username = "";
+    System.out.println("Welcome to Ecommerce Database\n\n");
 
     while (username.isBlank()) {
       System.out.println("Enter username");
@@ -80,14 +81,13 @@ public class EcommerceAppController {
       }
 
       accountId = ecommerceAppDao.getAccountId(username);
-      System.out.println("Account Id --->" + accountId);
 
       if (action == 1) {
         addProducts(in);
 
         addToCart(in);
 
-        moveToShipping(in);
+//        moveToShipping(in);
       } else if (action == 2) {
         manageOrders(in);
       } else if (action == 3) {
@@ -141,7 +141,7 @@ public class EcommerceAppController {
     System.out.println("Enter Shipping Address:");
     String shipAdd = in.nextLine();
     int orderid = this.insertOrders(shipAdd, this.userId, "Placed");
-    this.insertOrderDetails(orderid);
+    this.insertOrderDetails(orderid, this.userId);
     System.out.println("Choose a mode of payment: (Enter the id)");
     List<String> modeofPayment = this.getPaymentModes();
     modeofPayment.forEach(s -> {
@@ -174,33 +174,34 @@ public class EcommerceAppController {
 
       System.out.println("Total cart amount: " + totalVal);
 
-      System.out.println(
-          "Do you want to update cart or go to checkout? Press Y to update cart or N to checkout");
+      boolean isCartValue = true;
 
-      String isUpdateCart = in.nextLine();
-      if ("y".contentEquals(isUpdateCart)) {
+      while (isCartValue) {
+        System.out.println(
+            "Do you want to update cart or go to checkout? Press Y to update cart or N to checkout");
 
-        boolean isValidProduct = false;
+        String isUpdateCart = in.nextLine();
 
-        while (!isValidProduct) {
+        if ("y".contentEquals(isUpdateCart)) {
           try {
             System.out.println("Select product id to update the quantity");
             int productId = in.nextInt();
             System.out.println("Please sepcify the product quantity");
             int quantity = in.nextInt();
             ecommerceAppDao.updateCart(accountId, productId, quantity);
-            isValidProduct = true;
-            break;
+            isUpdateCart = "";
           } catch (Exception e) {
             System.out.println("Execution failed please try again");
             continue;
           }
+        } else {
+          isAddToCart = false;
+          isCartValue = true;
+          moveToShipping(in);
+          break;
         }
-
-      } else {
-        isAddToCart = false;
-        break;
       }
+
     }
   }
 
@@ -253,6 +254,11 @@ public class EcommerceAppController {
   public void registerNewUser(Scanner in) {
     System.out.println("Enter username:");
     String emailAddress = in.nextLine();
+    boolean ifUserExist = this.ifUserExists(emailAddress);
+    if (ifUserExist) {
+      System.out.println("Username already exists");
+      this.registerNewUser(in);
+    }
     System.out.println("Enter password:");
     String password1 = in.nextLine();
     System.out.println("Enter billing address:");
@@ -300,9 +306,9 @@ public class EcommerceAppController {
     return ecommerceAppDao.getProductsByCategory(categoryId);
   }
 
-  public void insertOrderDetails(int orderid) {
+  public void insertOrderDetails(int orderid, int userid) {
 
-    ecommerceAppDao.insertOrderDetails(orderid);
+    ecommerceAppDao.insertOrderDetails(orderid, userid);
   }
 
   public int insertOrders(String shippingAddress, int userid, String status) {
@@ -321,6 +327,10 @@ public class EcommerceAppController {
 
   public List<OrderDetail> getOrderDetails(int orderid) {
     return ecommerceAppDao.getOrderDetails(orderid);
+  }
+
+  public boolean ifUserExists(String email) {
+    return ecommerceAppDao.ifUserExists(email);
   }
 
   public void cancelOrder(int orderid) {
