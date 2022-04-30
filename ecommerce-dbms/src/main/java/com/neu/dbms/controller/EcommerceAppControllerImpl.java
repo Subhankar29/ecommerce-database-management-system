@@ -27,7 +27,8 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
   @Autowired
   private EcommerceAppDaoImpl ecommerceAppDao;
   double totalVal = 0;
-
+  int paymentIndex =0;
+  
   @GetMapping("/")
   public void getConnection() {
     System.out.println("Executed Get connection");
@@ -69,15 +70,20 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
     while (isContinueToAddProduct) {
       List<Category> categoryList = this.getCategories();
       System.out.println("\n");
+      
+      System.out.println("Categoty Id\tCategoty Name");
+      
       categoryList.forEach(s->{
-        System.out.println(s.getCategoryId() + "--->" + s.getCategoryName());
+        System.out.println(String.format("%3s%20s", s.getCategoryId(), s.getCategoryName()));
       });
       System.out.println("\nChoose a category (Enter the id)");
       int selectedCategory = Integer.parseInt(in.nextLine());
       List<Product> productList = this.getProductsByCatgory(selectedCategory);
       
+      System.out.println("Product Id\t\tProduct Name\t\tDescription\t\t\tPrice");
+      
       productList.forEach(product->{
-        System.out.println(product.getProductId() + "--->" + product.getName() + " Description --->" + product.getDescription() + " Price --->" + product.getPrice() + " ");
+        System.out.println(String.format("%3s%30s%25s%30s", product.getProductId(),  product.getName(),  product.getDescription(), product.getPrice()));
       });
       
       System.out.println("Select a product (product Id) to add to cart");
@@ -105,7 +111,7 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         totalVal = totalVal + product.getSubtotal();
       });
       
-     System.out.print("Total cart amount: " + totalVal);
+     System.out.println("Total cart amount: " + totalVal);
      
      System.out.println("Do you want to update cart or go to checkout? Press Y to update cart or N to checkout");
      
@@ -122,9 +128,33 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
      } 
     }
     
-    System.out.println("SELECT THE PAYMENT METHOD");
+    System.out.println("----------PROCEED TO SHIPPING--------");
     //return ecommerceAppDao.getUser(username, password);
+  System.out.println("Checkout");
+  System.out.println("Click c to check out:");
+  String checkout = in.nextLine();
+  if ("C".equalsIgnoreCase(checkout)) {
+  System.out.println("Enter Shipping Address:");
+  String shipAdd = in.nextLine();
+  System.out.println("Enter userid:");
+  int userid = 143;
+  int orderid = this.insertOrders(shipAdd, userid, "Placed");
+  this.insertOrderDetails(orderid);
+  System.out.println("Choose a mode of payment: (Enter the id)");
+  List<String> modeofPayment = this.getPaymentModes();
+  modeofPayment.forEach(s -> {
+  paymentIndex++;
+  System.out.println(paymentIndex + " ---> " + s);
+  });
+  int modeOfPayment = Integer.parseInt(in.nextLine());
+  this.insertPaymentInfo(orderid, modeOfPayment, accountId);
+  System.out.println("Order Placed:");
   }
+  }
+  
+  public List<String> getPaymentModes() {
+    return ecommerceAppDao.getPaymentModes();
+    }
   
   
   
@@ -189,18 +219,18 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
 
 
   @PostMapping("insertOrders")
-  public void insertOrders(@RequestParam("shipAdd") String shippingAddress,
+  public int insertOrders(@RequestParam("shipAdd") String shippingAddress,
   @RequestParam("userid") int userid, @RequestParam("status") String status) {
   System.out.println("Executed insert orders");
-  ecommerceAppDao.insertOrders(shippingAddress, userid, status);
+  return ecommerceAppDao.insertOrders(shippingAddress, userid, status);
   }
 
 
 
   @PostMapping("insertPaymentInfo")
   public void insertPaymentInfo(@RequestParam("orderid") int orderid,
-  @RequestParam("paymentInfo") String paymentInfo) {
+  @RequestParam("paymentInfo") int paymentInfo, @RequestParam("accountId") int accountId) {
   System.out.println("Executed insert payment info");
-  ecommerceAppDao.insertPaymentInfo(orderid, paymentInfo);
+  ecommerceAppDao.insertPaymentInfo(orderid, paymentInfo, accountId);
   }
 }

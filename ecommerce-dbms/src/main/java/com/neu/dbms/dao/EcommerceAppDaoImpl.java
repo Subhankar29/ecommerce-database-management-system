@@ -162,7 +162,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     }
     return row;
   }
-  
+
   @Override
   public void updateCart(int accountId, int productId, int quantity) {
     try {
@@ -175,7 +175,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-      
+
   }
 
   @Override
@@ -247,29 +247,52 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
     return productList;
   }
 
-  public void insertOrders(String shippingAddress, int userid, String status) {
+  @Override
+  public int insertOrders(String shippingAddress, int userid, String status) {
+    int res = 0;
     try {
       Connection conn = this.getConnection();
-      CallableStatement callstmt = conn.prepareCall("call insert_Orders(?,?,?)");
+      CallableStatement callstmt = conn.prepareCall("select insert_Orders(?,?,?)");
       callstmt.setString(1, shippingAddress);
       callstmt.setInt(2, userid);
       callstmt.setString(3, status);
+      ResultSet rest = callstmt.executeQuery();
+      if (rest.next()) {
+        res = rest.getInt(1);
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return res;
+  }
+
+  @Override
+  public void insertPaymentInfo(int orderId, int paymentInfo, int accountId) {
+    try {
+      Connection conn = this.getConnection();
+      CallableStatement callstmt = conn.prepareCall("call insert_Payment_Info(?,?)");
+      callstmt.setInt(1, orderId);
+      callstmt.setInt(2, paymentInfo);
       ResultSet rs = callstmt.executeQuery();
     } catch (SQLException e) {
       e.printStackTrace();
     }
   }
 
-  public void insertPaymentInfo(int orderId, String paymentInfo) {
+  public List<String> getPaymentModes() {
+    List<String> payModeList = new ArrayList<>();
     try {
       Connection conn = this.getConnection();
-      CallableStatement callstmt = conn.prepareCall("call insert_Payment_Info(?,?)");
-      callstmt.setInt(1, orderId);
-      callstmt.setString(2, paymentInfo);
-      ResultSet rs = callstmt.executeQuery();
+      Statement paymode = conn.createStatement();
+      ResultSet catrs = paymode.executeQuery("Select * from PaymentMode");
+      while (catrs.next()) {
+        payModeList.add(catrs.getString(2));
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    return payModeList;
   }
 
   public void getOrdersByUser(int userId) {

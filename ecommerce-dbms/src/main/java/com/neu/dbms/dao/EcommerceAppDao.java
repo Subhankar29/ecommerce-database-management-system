@@ -28,9 +28,9 @@ public interface EcommerceAppDao {
   
   public List<Product> getProductsByCategory(int categoryId);
   
-  public void insertOrders(String shippingAddress, int userid, String status);
+  public int insertOrders(String shippingAddress, int userid, String status);
 
-  public void insertPaymentInfo(int orderId, String paymentInfo);
+  public void insertPaymentInfo(int orderId, int paymentInfo, int accountId);
 
   public int insertOrderDetails(int orderid);
 }
