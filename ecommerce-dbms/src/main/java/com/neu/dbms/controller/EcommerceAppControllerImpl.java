@@ -79,7 +79,7 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         List<Category> categoryList = this.getCategories();
         System.out.println("\n");
 
-        System.out.format("%-15s%-15s\n", "Categoty Id", "Categoty Name");
+        System.out.println(String.format("%-15s%-15s", "Categoty Id", "Categoty Name"));
 
         categoryList.forEach(s -> {
           System.out.println(String.format("%-15s%-15s", s.getCategoryId(), s.getCategoryName()));
@@ -87,8 +87,8 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         System.out.println("\nChoose a category (Enter the id)");
         int selectedCategory = Integer.parseInt(in.nextLine());
         List<Product> productList = this.getProductsByCatgory(selectedCategory);
-
-        System.out.println("Product Id\t\tProduct Name\t\tDescription\t\t\tPrice");
+        
+        System.out.format("%-15s%-15s%-15s%-15s", "Product Id", "Name", "Description", "Price");
 
         productList.forEach(product -> {
           System.out.println(String.format("%3s%30s%25s%30s", product.getProductId(),
@@ -115,9 +115,12 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         List<CartProduct> productList = ecommerceAppDao.getProductsFromCart(accountId);
 
         totalVal = 0;
+        
+        System.out.println(String.format("%-15s%-15s%-15s%-15s", "Product Id", "Name", "Quantity", "Sub Total"));
+        
         productList.forEach(product -> {
-          System.out.println(product.getProductId() + "--->" + product.getName() + " quantity --->"
-              + product.getQuantity() + " sub-total --->" + product.getSubtotal() + " ");
+          System.out.println(String.format("%-15s%-15s%-15s%-15s", product.getProductId(), product.getName(), product.getQuantity(), product.getSubtotal()));
+          
           totalVal = totalVal + product.getSubtotal();
         });
 
@@ -161,13 +164,11 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
       }
     } else {
         List<Orders> orderList = this.getOrdersByUser(this.userId);
-        
-        System.out.println("orderId\t\tdateCreated\t\tstatus\t\t\ttotal");
-        
-        System.out.format("%-15s%-15s%-15s%-15s%\n", "orderId", "date Created", "status", "total");
+                
+        System.out.println(String.format("%-15s%-15s%-15s%-15s", "orderId", "date Created", "status", "total"));
         
         orderList.forEach(s->{
-          System.out.println(String.format("%-15s%-15s%-15s%-15s%",s.getOrderId(), s.getDateCreated(), s.getStatus(), s.getTotal()));
+          System.out.println(String.format("%-15s%-15s%-15s%-15s",s.getOrderId(), s.getDateCreated(), s.getStatus(), s.getTotal()));
         });
         
         System.out.println("Enter the orderId:");
@@ -175,7 +176,7 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         
         List<OrderDetail> orderDetailList = this.getOrderDetails(orderid);
         
-        System.out.format("%-15s%-15s%-15s%-15s%-15s%-15s\n", "ProductName", "UnitCost", "SubTotal", "Status", "PaymentMode", "Address");
+        System.out.println(String.format("%-15s%-15s%-15s%-15s%-15s%-15s", "ProductName", "UnitCost", "SubTotal", "Status", "PaymentMode", "Address"));
         
         orderDetailList.forEach(t->{
           System.out.println(String.format("%-15s%-15s%-15s%-15s%-15s%-15s", t.getProductName(),  t.getUnitCost(), t.getSubTotal(), t.getStatus(), t.getPaymentMode(), t.getShippingAddress()));
@@ -185,6 +186,7 @@ public class EcommerceAppControllerImpl implements EcommerceAppController {
         String ifCancel = in.nextLine();
         if("y".equalsIgnoreCase(ifCancel)) {
           this.cancelOrder(orderid);
+          System.out.println("Order canceled");
         }
     }
   }
