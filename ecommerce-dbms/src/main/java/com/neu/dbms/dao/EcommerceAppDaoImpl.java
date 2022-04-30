@@ -68,8 +68,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public int getUser(String user_Name, String pass_word) {
     int res = 0;
     try {
-      PreparedStatement pstmt = this.conn
-          .prepareStatement("SELECT loginId from user where Email = ? AND password = ?");
+      CallableStatement pstmt = this.conn.prepareCall("call get_User(?, ?)");
       pstmt.setString(1, user_Name);
       pstmt.setString(2, pass_word);
 
@@ -87,8 +86,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   @Override
   public int getAccountId(String emailAddress) {
     try {
-      PreparedStatement pstmt = this.conn.prepareStatement(
-          "SELECT AccountId from Account a inner join User u on u.loginId=a.userId  where u.Email = ?");
+      CallableStatement pstmt = this.conn.prepareCall("call get_AccountId(?)");
 
       pstmt.setString(1, emailAddress);
 
@@ -107,8 +105,8 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<Category> getCategories() {
     List<Category> categoryList = new ArrayList<>();
     try {
-      Statement catstmt = this.conn.createStatement();
-      ResultSet catrs = catstmt.executeQuery("Select * from Category");
+      CallableStatement catstmt = this.conn.prepareCall("call get_Categories()");
+      ResultSet catrs = catstmt.executeQuery();
       while (catrs.next()) {
         Category cat = new Category();
         cat.setCategoryId(catrs.getInt(1));
@@ -173,9 +171,7 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<CartProduct> getProductsFromCart(int accountId) {
     List<CartProduct> productList = new ArrayList<>();
     try {
-      PreparedStatement prodpstmt = this.conn.prepareStatement(
-          "select p.productid, p.name, c.quantity, (p.price * c.quantity) as subtotal from product as p inner join cart as c on c.productId = p.productId where accountId = ?");
-
+      CallableStatement prodpstmt = this.conn.prepareCall("call get_Products_From_Cart(?)");
       prodpstmt.setInt(1, accountId);
       ResultSet rs = prodpstmt.executeQuery();
       while (rs.next()) {
@@ -221,8 +217,8 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<Product> getProductsByCategory(int categoryId) {
     List<Product> productList = new ArrayList<>();
     try {
-      PreparedStatement prodpstmt = this.conn
-          .prepareStatement("SELECT * from Product where CategoryId = ?");
+      CallableStatement prodpstmt = this.conn
+          .prepareCall("call get_Products_By_Category(?)");
       prodpstmt.setInt(1, categoryId);
       ResultSet rs = prodpstmt.executeQuery();
       while (rs.next()) {
@@ -290,8 +286,8 @@ public class EcommerceAppDaoImpl implements EcommerceAppDao {
   public List<Orders> getOrdersByUser(int userId) {
     List<Orders> ordersList = new ArrayList<>();
     try {
-      PreparedStatement ordersstmt = this.conn.prepareStatement(
-          "select orderId, dateCreated, total, status from orders where customerId = ?");
+      CallableStatement ordersstmt = this.conn.prepareCall(
+          "call get_Orders_By_User(?)");
       ordersstmt.setInt(1, userId);
       ResultSet rs = ordersstmt.executeQuery();
       while(rs.next()) {
